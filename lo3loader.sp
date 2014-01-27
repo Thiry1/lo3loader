@@ -2,9 +2,9 @@
 #include<cstrike>
 #define PLUGIN_VERSION "1.2.5"
 //#define DEBUG
-#ifdef DEBUG
-    #include "net/fiveSeven/sourcemod/csgo/debug/autoloader.sp"
-#endif
+//#ifdef DEBUG
+//    #include "net/fiveSeven/sourcemod/csgo/debug/autoloader.sp"
+//#endif
 public Plugin:myinfo =
 {
     name = "lo3loader for CS:GO",

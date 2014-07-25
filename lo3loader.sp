@@ -18,7 +18,7 @@ new Handle:cvar_ll_enable_saycommand;
 new Handle:cvar_ll_match_config;
 new Handle:cvar_ll_enable_respawn;
 new Handle:cvar_ll_live_type;
-new Handle:clvar_ll_allow_toggle_sv_cheats;
+new Handle:cvar_ll_allow_toggle_sv_cheats;
 new Handle:panel;
 new bool:saycommand_enable=false;
 new bool:pauseStatus=false;
@@ -39,7 +39,7 @@ public OnPluginStart()
     cvar_ll_enable_respawn=CreateConVar("ll_enable_respawn","1","If non-zero,enable auto respawn when player is dead");
     cvar_ll_match_config=CreateConVar("ll_match_config","match.cfg","execute configs on live");
     cvar_ll_live_type=CreateConVar("ll_live_type","0","if zero,live type is lo3.non-zero is only one restart");
-    clvar_ll_allow_toggle_sv_cheats=CreateConVar("ll_allow_toggle_sv_cheats","1","if non-zero, client can toggle sv_cheats");
+    cvar_ll_allow_toggle_sv_cheats=CreateConVar("ll_allow_toggle_sv_cheats","1","if non-zero, client can toggle sv_cheats");
 
     g_iAccount = FindSendPropOffs("CCSPlayer", "m_iAccount");//money offset
 
@@ -113,7 +113,7 @@ public onPanelSelect(Handle:menu, MenuAction:action, client, param)
         }
         else if(param==3)//cheatsのトグル
         {
-            if(GetConVarInt(clvar_ll_allow_toggle_sv_cheats)!=0)//トグルが許可されていれば
+            if(GetConVarInt(cvar_ll_allow_toggle_sv_cheats)!=0)//トグルが許可されていれば
             {
                 new Handle:cvar_sv_cheats=FindConVar("sv_cheats");
                 if(GetConVarInt(cvar_sv_cheats))

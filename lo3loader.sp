@@ -1,6 +1,6 @@
 #include<sourcemod>
 #include<cstrike>
-#define PLUGIN_VERSION "1.2.5"
+#define PLUGIN_VERSION "1.2.6"
 //#define DEBUG
 //#ifdef DEBUG
 //    #include "net/fiveSeven/sourcemod/csgo/debug/autoloader.sp"
@@ -58,7 +58,7 @@ public OnMapStart()
 {
     //コンフィグの読み込み
     ServerCommand("exec lo3loader.cfg");
-    
+
     //saycommandの設定
     if( !GetConVarInt(cvar_ll_enable_saycommand) )
     {
@@ -84,11 +84,13 @@ public OnMapStart()
  */
 stock GeneratePanel()
 {
-    panel = CreatePanel();
-    SetPanelTitle(panel, "Lo3loader Menu");
-    DrawPanelItem(panel, "ESL default match config(FB1)");
-    DrawPanelItem(panel, "ESL config++(FB2)");
-    DrawPanelItem(panel, "Toggle sv_cheats");
+    panel = CreateMenu(onMenuSelect);
+    SetMenuTitle(panel, "Lo3loader Menu");
+    AddMenuItem(panel, "ESL_CONFIG"     , "Exec ESL Match Config");
+    AddMenuItem(panel, "OVERTIME_CONFIG", "Exec Overtime Config");
+    AddMenuItem(panel, "TOGGLE_CHEATS"  , "Toggle sv_cheats");
+    AddMenuItem(panel, "SWAP_TEAMS"     , "Swap Team");
+    AddMenuItem(panel, "SCRAMBLE_TEAMS" , "Scramble Team");
 }
 /**
  * クライアントがポップアップから選択した際にコールされる
@@ -97,23 +99,28 @@ stock GeneratePanel()
  * @param client パネルを選択したクライアント
  * @param param 選択されたパネルの番号
  */
-public onPanelSelect(Handle:menu, MenuAction:action, client, param)
+public onMenuSelect(Handle:menu, MenuAction:action, client, param)
 {
     if( action == MenuAction_Select )
     {
-        if( param == 1 )//ESLでデフォルトのコンフィグを読み込む
+        new String:selected[64];
+        GetMenuItem(menu, param, selected, sizeof(selected));
+
+        if( StrEqual(selected, "ESL_CONFIG", true) )//ESLのコンフィグを読み込む
         {
-            SetConVarString(cvar_ll_match_config, "match.cfg");
-            PrintToChatAll("match type: ESL default settings")
+            pausable = true;
+            SetConVarString(cvar_ll_match_config, "esl5on5.cfg");
+            PrintToChatAll("match type: ESL Match Config");
             ExecLo3();
         }
-        else if( param == 2 )//GOASAPのコンフィグを読み込む
+        else if( StrEqual(selected, "OVERTIME_CONFIG", true) )//overtimeのコンフィグを読み込む
         {
-            SetConVarString(cvar_ll_match_config, "match_fb2.cfg");
-            PrintToChatAll("match type: ESL++(FB2)");
+            pausable = true;
+            SetConVarString(cvar_ll_match_config, "overtime.cfg");
+            PrintToChatAll("match type: Overtime Match Config");
             ExecLo3();
         }
-        else if( param == 3 )//cheatsのトグル
+        else if( StrEqual(selected, "TOGGLE_CHEATS", true) )//cheatsのトグル
         {
             if( GetConVarInt(cvar_ll_allow_toggle_sv_cheats) != 0 )//トグルが許可されていれば
             {
@@ -131,6 +138,14 @@ public onPanelSelect(Handle:menu, MenuAction:action, client, param)
             {
                 PrintToChatAll("[lo3loader]this command is not allowed.")
             }
+        }
+        else if( StrEqual(selected, "SWAP_TEAMS", true) )
+        {
+            SwapTeams();
+        }
+        else if( StrEqual(selected, "SCRAMBLE_TEAMS", true) )
+        {
+            ScrambleTeams();
         }
     }
 }
@@ -331,53 +346,87 @@ public Action:Command_Say(client, args)
         }
         else if(StrEqual(text, "!menu", true))
         {
-            SendPanelToClient(panel, client, onPanelSelect, 20);
+            DisplayMenu(panel, client, MENU_TIME_FOREVER);
         }
         else if(StrEqual(text, "!scramble", true))
         {
-            PrintToChatAll("[lo3loader]Scramble teams...");
-            ServerCommand("mp_scrambleteams");
+            ScrambleTeams()
         }
         else if(StrEqual(text, "!swap", true))
         {
-            PrintToChatAll("[lo3loader]Swapping teams...");
-            ServerCommand("mp_swapteams");
+            SwapTeams();
         }
         else if(StrEqual(text, "!pause", true))
         {
-            if( pausable )
-            {
-                new String:name[128];
-                GetClientName(client, name, sizeof(name));
-                PrintToChatAll("[lo3loader] Match is paused by %s", name);
-                ServerCommand("mp_pause_match");
-                pauseStatus = true;
-            }
-            else
-            {
-                PrintToChatAll("[lo3loader]This command is disallowed now")
-            }
+            pause(client);
         }
         else if(StrEqual(text, "!unpause"))
         {
-            if( pauseStatus )
-            {
-                new String:name[128];
-                GetClientName(client, name, sizeof(name));
-                PrintToChatAll("[lo3loader]Match is resumed by %s", name);
-                pauseStatus = false;
-                CreateTimer(0.0, ResumeMatch);
-            }
-            else
-            {
-                PrintToChatAll("[lo3loader]This command is disallowed now")
-            }
+            unpause(client);
         }
         else if(StrEqual(text, "!ot"))
         {
             SetConVarString(cvar_ll_match_config, "overtime.cfg");
             ExecLo3();
         }
+    }
+}
+
+/**
+ * チームのスクランブルを行う
+ */
+stock ScrambleTeams()
+{
+    PrintToChatAll("[lo3loader]Scramble teams...");
+    ServerCommand("mp_scrambleteams");
+}
+
+/**
+ * チームのスワップを行う
+ */
+stock SwapTeams()
+{
+    PrintToChatAll("[lo3loader]Swapping teams...");
+    ServerCommand("mp_swapteams");
+}
+
+/**
+ * ポーズを行う
+ * @param client
+ */
+stock pause(client)
+{
+    if( pausable )
+    {
+        new String:name[128];
+        GetClientName(client, name, sizeof(name));
+        PrintToChatAll("[lo3loader] Match is paused by %s", name);
+        ServerCommand("mp_pause_match");
+        pauseStatus = true;
+    }
+    else
+    {
+        PrintToChatAll("[lo3loader]This command is disallowed now")
+    }
+}
+
+/**
+ * ポーズの解除を行う
+ * @param client
+ */
+stock unpause(client)
+{
+    if( pauseStatus )
+    {
+        new String:name[128];
+        GetClientName(client, name, sizeof(name));
+        PrintToChatAll("[lo3loader]Match is resumed by %s", name);
+        pauseStatus = false;
+        CreateTimer(0.0, ResumeMatch);
+    }
+    else
+    {
+        PrintToChatAll("[lo3loader]This command is disallowed now")
     }
 }
 /**

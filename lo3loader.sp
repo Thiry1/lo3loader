@@ -1,6 +1,6 @@
 #include<sourcemod>
 #include<cstrike>
-#define PLUGIN_VERSION "1.2.6"
+#define PLUGIN_VERSION "1.2.7"
 //#define DEBUG
 //#ifdef DEBUG
 //    #include "net/fiveSeven/sourcemod/csgo/debug/autoloader.sp"
@@ -22,6 +22,7 @@ new Handle:cvar_ll_allow_toggle_sv_cheats;
 new Handle:panel;
 new live_type;
 new g_iAccount;
+new String:LL_MATCH_CONFIG_DEFAULT[64];
 new bool:saycommand_enable = false;
 new bool:pauseStatus       = false;
 new bool:pausable          = false;
@@ -36,10 +37,10 @@ public OnPluginStart()
     RegConsoleCmd("say"     , Command_Say);
     RegConsoleCmd("say_team", Command_Say);
 
-    cvar_ll_enable_saycommand      = CreateConVar("ll_enable_saycommand"     , "1"        , "If non-zero,enable say hook. everyone can execute lo3 by say !lo3");
-    cvar_ll_enable_respawn         = CreateConVar("ll_enable_respawn"        , "1"        , "If non-zero,enable auto respawn when player is dead");
+    cvar_ll_enable_saycommand      = CreateConVar("ll_enable_saycommand"     , "1"        , "If non-zero, enable say hook. everyone can execute lo3 by say !lo3");
+    cvar_ll_enable_respawn         = CreateConVar("ll_enable_respawn"        , "1"        , "If non-zero, enable auto respawn when player is dead");
     cvar_ll_match_config           = CreateConVar("ll_match_config"          , "match.cfg","execute configs on live");
-    cvar_ll_live_type              = CreateConVar("ll_live_type"             , "0"        , "if zero,live type is lo3.non-zero is only one restart");
+    cvar_ll_live_type              = CreateConVar("ll_live_type"             , "0"        , "if zero, live type is lo3.non-zero is only one restart");
     cvar_ll_allow_toggle_sv_cheats = CreateConVar("ll_allow_toggle_sv_cheats", "1"        , "if non-zero, client can toggle sv_cheats");
     g_iAccount                     = FindSendPropOffs("CCSPlayer"            , "m_iAccount");//money offset
 
@@ -58,6 +59,9 @@ public OnMapStart()
 {
     //コンフィグの読み込み
     ServerCommand("exec lo3loader.cfg");
+
+    //ll_match_configに指定されている値をデフォルト値として格納
+    GetConVarString(cvar_ll_match_config, LL_MATCH_CONFIG_DEFAULT, sizeof(LL_MATCH_CONFIG_DEFAULT));
 
     //saycommandの設定
     if( !GetConVarInt(cvar_ll_enable_saycommand) )
@@ -86,11 +90,12 @@ stock GeneratePanel()
 {
     panel = CreateMenu(onMenuSelect);
     SetMenuTitle(panel, "Lo3loader Menu");
-    AddMenuItem(panel, "ESL_CONFIG"     , "Exec ESL Match Config");
+    AddMenuItem(panel, "MATCH_CONFIG"   , "Exec Match Config");
     AddMenuItem(panel, "OVERTIME_CONFIG", "Exec Overtime Config");
     AddMenuItem(panel, "TOGGLE_CHEATS"  , "Toggle sv_cheats");
     AddMenuItem(panel, "SWAP_TEAMS"     , "Swap Team");
     AddMenuItem(panel, "SCRAMBLE_TEAMS" , "Scramble Team");
+    AddMenuItem(panel, "RELOAD_CONFIG"  , "Reload lo3loader.cfg");
 }
 /**
  * クライアントがポップアップから選択した際にコールされる
@@ -106,11 +111,11 @@ public onMenuSelect(Handle:menu, MenuAction:action, client, param)
         new String:selected[64];
         GetMenuItem(menu, param, selected, sizeof(selected));
 
-        if( StrEqual(selected, "ESL_CONFIG", true) )//ESLのコンフィグを読み込む
+        if( StrEqual(selected, "MATCH_CONFIG", true) )//ESLのコンフィグを読み込む
         {
             pausable = true;
-            SetConVarString(cvar_ll_match_config, "esl5on5.cfg");
-            PrintToChatAll("match type: ESL Match Config");
+            SetConVarString(cvar_ll_match_config, LL_MATCH_CONFIG_DEFAULT);
+            PrintToChatAll("match type: LL Match Config");
             ExecLo3();
         }
         else if( StrEqual(selected, "OVERTIME_CONFIG", true) )//overtimeのコンフィグを読み込む
@@ -119,6 +124,7 @@ public onMenuSelect(Handle:menu, MenuAction:action, client, param)
             SetConVarString(cvar_ll_match_config, "overtime.cfg");
             PrintToChatAll("match type: Overtime Match Config");
             ExecLo3();
+            SetConVarString(cvar_ll_match_config, LL_MATCH_CONFIG_DEFAULT);
         }
         else if( StrEqual(selected, "TOGGLE_CHEATS", true) )//cheatsのトグル
         {
@@ -146,6 +152,10 @@ public onMenuSelect(Handle:menu, MenuAction:action, client, param)
         else if( StrEqual(selected, "SCRAMBLE_TEAMS", true) )
         {
             ScrambleTeams();
+        }
+        else if( StrEqual(selected, "RELOAD_CONFIG", true) )
+        {
+            ServerCommand("exec lo3loader.cfg");
         }
     }
 }
@@ -183,7 +193,7 @@ public ExecLo3()
  */
 public Action:live(Handle:timer)
 {
-    for(new i=0; i<=6; i++)
+    for(new i = 0; i <= 6; i++)
     {
         PrintToChatAll("[lo3loader] -=!Live!=-");
     }
@@ -240,7 +250,7 @@ public Action:Command_lo3(args)
 public Action:respawn(Handle:timer,any:client)
 {
     new team = GetClientTeam(client);//0=connecting,1=spect,2=t,3=ct
-    if( IsClientInGame(client) && !IsPlayerAlive(client) && team>1 )//再度プレーヤーがサーバー上に適切な形で存在するか確認
+    if( IsClientInGame(client) && !IsPlayerAlive(client) && team > 1 )//再度プレーヤーがサーバー上に適切な形で存在するか確認
     {
         GiveClientMoney(client);//プレーヤーの所持金を$16000に設定
         CS_RespawnPlayer(client);
@@ -253,7 +263,7 @@ public Action:respawn(Handle:timer,any:client)
 public RespawnClient(client)
 {
     new team = GetClientTeam(client);//0=connecting,1=spect,2=t,3=ct
-    if( IsClientInGame(client) && !IsPlayerAlive(client) && team>1 )//プレーヤーがサーバー上に適切な形で存在するか確認
+    if( IsClientInGame(client) && !IsPlayerAlive(client) && team > 1 )//プレーヤーがサーバー上に適切な形で存在するか確認
     {
         PrintToChat(client, "[lo3loader]you will be respawn after 2 seconds");
         CreateTimer(2.0, respawn, any:client);
@@ -335,6 +345,7 @@ public Action:Command_Say(client, args)
 
         if( (StrEqual(text, "!lo3", true)) || (StrEqual(text, "!live", true)) )
         {
+            SetConVarString(cvar_ll_match_config, LL_MATCH_CONFIG_DEFAULT);//ll_match_configで指定されているコンフィグを設定
             pausable = true;
             ExecLo3();
         }

@@ -39,7 +39,7 @@ public OnPluginStart()
 
     cvar_ll_enable_saycommand      = CreateConVar("ll_enable_saycommand"     , "1"        , "If non-zero, enable say hook. everyone can execute lo3 by say !lo3");
     cvar_ll_enable_respawn         = CreateConVar("ll_enable_respawn"        , "1"        , "If non-zero, enable auto respawn when player is dead");
-    cvar_ll_match_config           = CreateConVar("ll_match_config"          , "match.cfg","execute configs on live");
+    cvar_ll_match_config           = CreateConVar("ll_match_config"          , "esl5on5.cfg","execute configs on live");
     cvar_ll_live_type              = CreateConVar("ll_live_type"             , "0"        , "if zero, live type is lo3.non-zero is only one restart");
     cvar_ll_allow_toggle_sv_cheats = CreateConVar("ll_allow_toggle_sv_cheats", "1"        , "if non-zero, client can toggle sv_cheats");
     g_iAccount                     = FindSendPropOffs("CCSPlayer"            , "m_iAccount");//money offset

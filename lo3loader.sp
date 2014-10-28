@@ -142,7 +142,7 @@ public onMenuSelect(Handle:menu, MenuAction:action, client, param)
             }
             else
             {
-                PrintToChatAll("[lo3loader]this command is not allowed.")
+                PrintToChatAll("[lo3loader]this command is not allowed.");
             }
         }
         else if( StrEqual(selected, "SWAP_TEAMS", true) )
@@ -156,6 +156,7 @@ public onMenuSelect(Handle:menu, MenuAction:action, client, param)
         else if( StrEqual(selected, "RELOAD_CONFIG", true) )
         {
             ServerCommand("exec lo3loader.cfg");
+            PrintToChatAll("[lo3loader]reload config");
         }
     }
 }

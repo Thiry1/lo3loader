@@ -1,61 +1,67 @@
 [1.1.0]
 
-CS:GO�̃T�|�[�g
+CS:GOのサポート
 
 [1.1.1]
 
-�X�y�N�g���R�}���h�����s�ł��Ȃ������C��
+スペクトがコマンドを実行できない問題を修正
 
-�R���t�B�O�̎�ނ�I���\��
+コンフィグの種類を選択可能に
 
 [1.1.1b]
 
-�뎚�̏C��
-�R���t�B�O�̓����~�X���C��
+誤字の修正
+コンフィグの導入ミスを修正
 
 [1.2.0]
 
-!swap�A!scramble�R�}���h�̒ǉ�
-live�̎�ނ�ǉ�
+!swap、!scrambleコマンドの追加
+liveの種類を追加
 
-respawn���[�h����buytime��999�ɕύX
+respawnモード時のbuytimeを999に変更
 
-respawn����$16000���x������悤�ɕύX
+respawn時に$16000を支給するように変更
 
 [1.2.1]
 
-respawn���[�h�ɂ���ă`�[���̈ړ����ł��Ȃ������C��
+respawnモードによってチームの移動ができない問題を修正
 
-T��������CT����ϐ�Ɉړ��������ƂɃv���[���[���X�^�b�N��������C��
+TもしくはCTから観戦に移動したあとにプレーヤーがスタックする問題を修正
 
 [1.2.2]
 
-!menu����sv_cheats�̒l��ύX�o����@�\��ǉ�
+!menuからsv_cheatsの値を変更出来る機能を追加
 
-!ot�R�}���h�̒ǉ�
+!otコマンドの追加
 
 [1.2.3]
 
-sv_cheats�̃g�O���𖳌��ɂ���cvar��ǉ�
+sv_cheatsのトグルを無効にするcvarを追加
 
-�z��O�̕����F���g�p�����o�O���C��
+想定外の文字色が使用されるバグを修正
 
 [1.2.4]
 
-!pause�A!unpause�R�}���h�̒ǉ�
+!pause、!unpauseコマンドの追加
 
 [1.2.5]
 
-�p�t�H�[�}���X����
+パフォーマンス向上
 
-CS:S�T�|�[�g�̔p�~
+CS:Sサポートの廃止
 
 [1.2.6]
 
-!menu���̃��K�V�[�R���t�B�O�̃��[�h�@�\��p�~����
+!menu内のレガシーコンフィグのロード機能を廃止した
 
-!menu�ɕ���@�\��ǉ�����
+!menuに閉じる機能を追加した
 
-!menu��scramble���̋@�\��I���ł���悤�ɂ���
+!menuでscramble等の機能を選択できるようにした
 
-!menu��overtime�p��lo3���s��ǉ�����
+!menuにovertime用のlo3実行を追加した
+
+[1.2.7]
+
+!menuから実行するlo3のコンフィグがll_match_configから読み込まれていない問題を修正
+
+!otもしくは!menuからovertimeを実行した後に!lo3を行うとovertime.cfgが読み込まれる不具合を修正

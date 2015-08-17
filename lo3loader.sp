@@ -1,6 +1,6 @@
 #include<sourcemod>
 #include<cstrike>
-#define PLUGIN_VERSION "1.2.7"
+#define PLUGIN_VERSION "1.2.8"
 //#define DEBUG
 //#ifdef DEBUG
 //    #include "net/fiveSeven/sourcemod/csgo/debug/autoloader.sp"
@@ -19,6 +19,7 @@ new Handle:cvar_ll_match_config;
 new Handle:cvar_ll_enable_respawn;
 new Handle:cvar_ll_live_type;
 new Handle:cvar_ll_allow_toggle_sv_cheats;
+new Handle:cvar_sv_coaching_enabled;
 new Handle:panel;
 new live_type;
 new g_iAccount;
@@ -42,6 +43,7 @@ public OnPluginStart()
     cvar_ll_match_config           = CreateConVar("ll_match_config"          , "esl5on5.cfg","execute configs on live");
     cvar_ll_live_type              = CreateConVar("ll_live_type"             , "0"        , "if zero, live type is lo3.non-zero is only one restart");
     cvar_ll_allow_toggle_sv_cheats = CreateConVar("ll_allow_toggle_sv_cheats", "1"        , "if non-zero, client can toggle sv_cheats");
+    cvar_sv_coaching_enabled       = FindConVar("sv_coaching_enabled");
     g_iAccount                     = FindSendPropOffs("CCSPlayer"            , "m_iAccount");//money offset
 
     HookEvent("teamchange_pending"  , ev_teamchange_pending);
@@ -380,6 +382,24 @@ public Action:Command_Say(client, args)
         {
             SetConVarString(cvar_ll_match_config, "overtime.cfg");
             ExecLo3();
+        }
+        else if(StrEqual(text, "!coach t"))
+        {
+            if( GetConVarInt(cvar_sv_coaching_enabled) != 1 ) {
+                PrintToChat(client, "coach mode has disabled by server");
+                return;
+            }
+
+            ClientCommand(client, "coach t");
+        }
+        else if(StrEqual(text, "!coach ct"))
+        {
+            if( GetConVarInt(cvar_sv_coaching_enabled) != 1 ) {
+                PrintToChat(client, "coach mode has disabled by server");
+                return;
+            }
+
+            ClientCommand(client, "coach ct");
         }
     }
 }
